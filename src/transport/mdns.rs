@@ -14,7 +14,9 @@ pub struct MdnsResponder {
 
 impl MdnsResponder {
     /// Creates a new mDNS Responder.
-    pub fn new(config: pointer::Config) -> Self { MdnsResponder { config } }
+    pub fn new(config: pointer::Config) -> Self {
+        MdnsResponder { config }
+    }
 
     // this should be the correct implementation, but (as of 0.4.1) the UDP stream implementation of libmdns is
     // broken. instead of polling & waking correctly, the stream is busy looping on Poll::Pending and needs to be
@@ -61,7 +63,7 @@ impl MdnsResponder {
     pub fn run_handle(&self) -> impl Future<Output = ()> + Send + '_ {
         let config = self.config.clone();
         std::thread::spawn(move || {
-            let mut rt = tokio::runtime::Runtime::new().expect("creating tokio runtime");
+            let rt = tokio::runtime::Runtime::new().expect("creating tokio runtime");
             rt.block_on(async move {
                 let responder = libmdns::Responder::new().expect("couldn't create mDNS responder");
 
@@ -77,18 +79,21 @@ impl MdnsResponder {
 
                     let name = name.clone();
 
-                    let _svc = responder.register("_hap._tcp".into(), name, port, &[
-                        &tr[0], &tr[1], &tr[2], &tr[3], &tr[4], &tr[5], &tr[6], &tr[7],
-                    ]);
+                    let _svc = responder.register(
+                        "_hap._tcp".into(),
+                        name,
+                        port,
+                        &[&tr[0], &tr[1], &tr[2], &tr[3], &tr[4], &tr[5], &tr[6], &tr[7]],
+                    );
                     debug!("announcing mDNS: {:?}", &tr);
 
-                    time::delay_for(Duration::from_millis(match status_flag {
+                    time::sleep(Duration::from_millis(match status_flag {
                         crate::transport::bonjour::BonjourStatusFlag::NotPaired => 1000,
                         _ => 20_000,
                     }))
                     .await;
                 }
-
+                unreachable!();
                 Ok(()) as Result<(), ()>
             })
             .expect("starting runtime");

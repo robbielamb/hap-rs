@@ -39,7 +39,7 @@ pub enum Error {
     #[error("Hyper HTTP Error: {0}")]
     Http(#[from] hyper::http::Error),
     #[error("Hyper Error: {0}")]
-    Hyper(#[from] hyper::error::Error),
+    Hyper(#[from] hyper::Error),
     #[error("Task Join Error: {0}")]
     TaskJoin(#[from] tokio::task::JoinError),
     #[error("AEAD Error")]
@@ -57,5 +57,7 @@ pub enum Error {
 }
 
 impl From<aead::Error> for Error {
-    fn from(_: aead::Error) -> Self { Error::Aead }
+    fn from(_: aead::Error) -> Self {
+        Error::Aead
+    }
 }

@@ -17,8 +17,7 @@ use crate::{
     server::Server,
     storage::{accessory_list::AccessoryList, Storage},
     transport::{http::server::Server as HttpServer, mdns::MdnsResponder},
-    BonjourStatusFlag,
-    Result,
+    BonjourStatusFlag, Result,
 };
 
 /// HAP Server via TCP/IP.
@@ -111,7 +110,7 @@ impl IpServer {
                                 c.status_flag = BonjourStatusFlag::Zero;
                             }
                         }
-                    },
+                    }
                     Event::ControllerUnpaired { id } => {
                         info!("controller {} unpaired", id);
 
@@ -123,8 +122,8 @@ impl IpServer {
                                 c.status_flag = BonjourStatusFlag::NotPaired;
                             }
                         }
-                    },
-                    _ => {},
+                    }
+                    _ => {}
                 }
             }
             .boxed()
@@ -165,12 +164,17 @@ impl Server for IpServer {
         let http_handle = self.http_server.run_handle();
         let mdns_handle = self.mdns_responder.run_handle();
 
+        //Box::pin(http_handle.map(|_| ()).boxed())
         Box::pin(future::join(http_handle, mdns_handle).map(|_| ()).boxed())
     }
 
-    fn config_pointer(&self) -> pointer::Config { self.config.clone() }
+    fn config_pointer(&self) -> pointer::Config {
+        self.config.clone()
+    }
 
-    fn storage_pointer(&self) -> pointer::Storage { self.storage.clone() }
+    fn storage_pointer(&self) -> pointer::Storage {
+        self.storage.clone()
+    }
 
     async fn add_accessory<A: HapAccessory + 'static>(&self, accessory: A) -> Result<pointer::Accessory> {
         let accessory = self.accessory_list.lock().await.add_accessory(Box::new(accessory))?;

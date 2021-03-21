@@ -27,17 +27,13 @@ use crate::{
                 pair_setup::PairSetup,
                 pair_verify::PairVerify,
                 pairings::Pairings,
-                HandlerExt,
-                JsonHandler,
-                TlvHandler,
+                HandlerExt, JsonHandler, TlvHandler,
             },
-            status_response,
-            EventObject,
+            status_response, EventObject,
         },
         tcp::{EncryptedStream, Session, StreamWrapper},
     },
-    Error,
-    Result,
+    Error, Result,
 };
 
 struct Handlers {
@@ -124,7 +120,7 @@ impl Service<Request<Body>> for Api {
 
         let fut = async move {
             match handler.take() {
-                Some(handler) =>
+                Some(handler) => {
                     handler
                         .lock()
                         .await
@@ -138,7 +134,8 @@ impl Service<Request<Body>> for Api {
                             accessory_list,
                             event_emitter,
                         )
-                        .await,
+                        .await
+                }
                 None => future::ready(status_response(StatusCode::NOT_FOUND)).await,
             }
         }
@@ -183,10 +180,8 @@ impl Server {
 
             info!("binding TCP listener on {}", &socket_addr);
 
-            let mut incoming = listener.incoming();
 
-            while let Some(stream) = incoming.next().await {
-                let stream = stream?;
+            while let Ok((stream, _)) = listener.accept().await {
 
                 debug!("incoming TCP stream from {}", stream.peer_addr()?);
 
@@ -237,8 +232,8 @@ impl Server {
                                 for s in dropped_subscriptions {
                                     ev.remove(s);
                                 }
-                            },
-                            _ => {},
+                            }
+                            _ => {}
                         }
                     }
                     .boxed()

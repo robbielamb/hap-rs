@@ -31,8 +31,8 @@ erased-serde = "0.3"
 eui48 = { version = "1.0", features = ["serde"] }
 futures = "0.3"
 hkdf = "0.10"
-hyper = "0.13"
-libmdns = "0.2"
+hyper = { version = "0.14", features = ["http1", "server", "stream"] }
+libmdns = "0.6"
 log = "0.4"
 num = "0.2"
 rand = "0.7"
@@ -42,7 +42,7 @@ sha2 = "0.9"
 signature = "1.1"
 srp = "0.5"
 thiserror = "1.0"
-tokio = { version = "0.2", features = ["full"] }
+tokio = { version = "^1.0", features = ["full"] }
 url = "2.1"
 uuid = { version = "0.8", features = ["v4", "serde"] }
 x25519-dalek = "0.6"
